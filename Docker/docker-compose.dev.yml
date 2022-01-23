@@ -1,0 +1,31 @@
+version: '3.9'
+services:
+  db:
+    image: postgres
+    ports: 
+      - 5435:5435
+    volumes:
+      - postgre-acgastropub_dev:/var/lib/postgresql/data
+    env_file: ../envs/.dev.env
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER}']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  flask:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports: 
+      - 8000:8000
+    volumes: 
+      - ../:/app
+    env_file: ../envs/.dev.env
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  postgre-acgastropub_dev:
+    external: false
